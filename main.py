@@ -94,22 +94,23 @@ def search(location):
     return jsonify(cafes_list)  # Return JSON data if cafes are found
 
 
-    
 
 
 # HTTP POST - Create Record
 
-@app.route("/add", methods=["POST"])
+@app.route("/add", methods=["GET","POST"])
 def add_place():
+
+    
     new_cafe = Cafe(
       name = request.form.get("name"),
       map_url= request.form.get("map_url"),
       img_url= request.form.get("img_url"),
       location= request.form.get("location"),
-      has_sockets= request.form.get("has_sockets"),
-      has_toilet= request.form.get("has_toilet"),
-      has_wifi= request.form.get("has_wifi"),
-      can_take_calls= request.form.get("can_take_calls"),
+      has_sockets= bool(request.form.get("has_sockets")),
+      has_toilet= bool(request.form.get("has_toilet")),
+      has_wifi= bool(request.form.get("has_wifi")),
+      can_take_calls= bool(request.form.get("can_take_calls")),
       seats= request.form.get("seats"),
       coffee_price=request.form.get("coffee_price")
 
@@ -122,7 +123,42 @@ def add_place():
 
 # HTTP PUT/PATCH - Update Record
 
+@app.route("/update-price/<cafe_id>", methods =["PATCH"])
+def update_price(cafe_id):
+    cafe_place_by_id = Cafe.query.filter_by(id=cafe_id).first()
+
+
+    if not cafe_place_by_id:
+        return jsonify({"error": "Cafe not found"}), 404
+    
+    new_price = request.form.get("new_price")
+
+    if new_price:
+        cafe_place_by_id.coffee_price = new_price
+        db.session.commit()
+        return jsonify({"message": "The price was updated "})
+    else:
+        return jsonify({"error": "No price provided"})
+    
+
+
 # HTTP DELETE - Delete Record
+
+
+@app.route("/delete/<cafe_id>", methods=["DELETE"])
+def delete_cafe(cafe_id):
+    cafe_to_delete_id = Cafe.query.filter_by(id=cafe_id).first()
+    print(cafe_to_delete_id)
+
+    if not cafe_to_delete_id:
+        return jsonify({"error": "No such cafe found"})
+    
+    db.session.delete(cafe_to_delete_id)
+    db.session.commit()
+
+    return jsonify({"message": "The entry has been deleted."})
+
+
 
 
 
