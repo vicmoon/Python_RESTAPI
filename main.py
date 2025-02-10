@@ -83,18 +83,49 @@ def get_all():
     return jsonify(cafes_list)
 
 
+@app.route("/search/<string:location>")
+def search(location):
+    cafes_by_location = Cafe.query.filter_by(location=location).all()
+    cafes_list = [cafe.to_dict() for cafe in cafes_by_location]
+
+    if not cafes_list:  # Correct way to check for an empty list
+        return jsonify({"error": "No cafes found for this location"}), 404  
+
+    return jsonify(cafes_list)  # Return JSON data if cafes are found
 
 
+    
 
-
-
-        
 
 # HTTP POST - Create Record
+
+@app.route("/add", methods=["POST"])
+def add_place():
+    new_cafe = Cafe(
+      name = request.form.get("name"),
+      map_url= request.form.get("map_url"),
+      img_url= request.form.get("img_url"),
+      location= request.form.get("location"),
+      has_sockets= request.form.get("has_sockets"),
+      has_toilet= request.form.get("has_toilet"),
+      has_wifi= request.form.get("has_wifi"),
+      can_take_calls= request.form.get("can_take_calls"),
+      seats= request.form.get("seats"),
+      coffee_price=request.form.get("coffee_price")
+
+    )
+    db.session.add(new_cafe)
+
+    db.session.commit()
+    return jsonify({"message": "Cafe added successfully"})
+
 
 # HTTP PUT/PATCH - Update Record
 
 # HTTP DELETE - Delete Record
+
+
+
 
 
 if __name__ == '__main__':
